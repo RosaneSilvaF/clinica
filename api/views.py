@@ -8,11 +8,13 @@ import datetime
 
 class UserAPI(APIView):
     def get(self,request):
-        PACIENTE = 1
-        FUNCIONARIO = 2
-        usuario_tipo = request.data.get('tipo')
-        usuario_id = request.data.get('usuario_id') or None
-
+        PACIENTE = "1"
+        FUNCIONARIO = "2"
+        usuario_tipo = request.query_params['tipo']
+        try: 
+            usuario_id = request.query_params['usuario_id'] or None
+        except:
+            usuario_id = None
         
         try:
             if usuario_tipo == PACIENTE:
@@ -116,10 +118,13 @@ class UserAPI(APIView):
 
 class EnderecoAPI(APIView):
     def get(self,request):
-        usuario = request.data.get('usuario') or ''
+        try:
+            usuario = request.query_params['usuario']
+        except:
+            usuario = None
         
         if usuario:
-            usuario_endereco = Usuario.objects.all().get(id=usuario).endereco
+            usuario_endereco = Usuario.objects.all().get(id=int(usuario)).endereco
             print(usuario_endereco)
             endereco_response = EnderecoSerializer(usuario_endereco, many = False).data
             return Response(endereco_response)
@@ -172,9 +177,9 @@ class AgendaAPI(APIView):
         return Response('OK', status=status.HTTP_200_OK)
 
     def get(self,request):
-        if request.data.get('medico_id') :
-            medico_id = request.data.get('medico_id') 
-        else : 
+        try:
+            medico_id = request.query_params['medico_id'] 
+        except : 
             medico_id = None
 
         if not medico_id:
@@ -183,9 +188,8 @@ class AgendaAPI(APIView):
 
             return Response(agendamentos_serializer,status=status.HTTP_200_OK)
 
-        try:
-            agendamentos = Agenda.objects.all().filter(medico_id=medico_id)
-        except Agenda.DoesNotExist:
+        agendamentos = Agenda.objects.all().filter(medico_id=int(medico_id))
+        if not agendamentos:
             return Response('Não foram encontrados agendamentos para esse médico', status=status.HTTP_404_NOT_FOUND)
 
         agendamentos_serializer = AgendaSerializer(agendamentos,many=True).data
