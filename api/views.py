@@ -17,6 +17,7 @@ class UserAPI(APIView):
     def get(self,request):
         PACIENTE = "1"
         FUNCIONARIO = "2"
+        MEDICO = "3"
         try:
             usuario_tipo = request.query_params['tipo']
         except:
@@ -39,7 +40,7 @@ class UserAPI(APIView):
                 else:
                     pacientes = Paciente.objects.all()
                     pacientes_response = PacienteSerializer(pacientes, many = True).data
-                return Response(pacientes_response)
+                return Response({'usuarios':pacientes_response, 'tipo': PACIENTE})
             elif usuario_tipo == FUNCIONARIO:
                 if usuario_id:
                     funcionarios = Funcionario.objects.all().get(id=usuario_id)
@@ -47,7 +48,7 @@ class UserAPI(APIView):
                 else:
                     funcionarios = Funcionario.objects.all()
                     funcionario_response = FuncionarioSerializer(funcionarios, many = True).data
-                return Response(funcionario_response)
+                return Response({'usuarios':funcionario_response, 'tipo': FUNCIONARIO})
             else:
                 if usuario_id:
                     medicos = Medico.objects.all().get(id=usuario_id)
@@ -58,7 +59,7 @@ class UserAPI(APIView):
                 else:
                     medicos = Medico.objects.all()
                     medico_response = MedicoSerializer(medicos, many = True).data
-                return Response(medico_response)
+                return Response({'usuarios':funcionario_response, 'tipo': MEDICO})
         except Exception as e:
             return Response("Erro ao obter usuário, verifique se o tipo e o id do usuário estão de acordo", status=status.HTTP_400_BAD_REQUEST)
 
