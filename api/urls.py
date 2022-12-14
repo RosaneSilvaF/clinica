@@ -6,4 +6,5 @@ urlpatterns = [
     path('endereco/', EnderecoAPI.as_view()),
     path('login/', LoginAPI.as_view()),
     path('agenda/', AgendaAPI.as_view()),
+    path('especialidades/', get_especialidades),
 ]

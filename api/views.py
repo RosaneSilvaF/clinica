@@ -4,17 +4,32 @@ from usuario.models import *
 from agenda.models import Agenda
 from api.serializers import *
 from datetime import datetime as date_time
+from rest_framework.decorators import api_view
 import datetime
+
+@api_view(['GET'])
+def get_especialidades(request):
+    if request.method == 'GET':
+        espec = Medico.objects.all().values_list('especialidade')
+        return Response(espec)
 
 class UserAPI(APIView):
     def get(self,request):
         PACIENTE = "1"
         FUNCIONARIO = "2"
-        usuario_tipo = request.query_params['tipo']
+        try:
+            usuario_tipo = request.query_params['tipo']
+        except:
+            Response("O tipo do usuário é obrigatório na requisição", status=status.HTTP_400_BAD_REQUEST)
         try: 
-            usuario_id = request.query_params['usuario_id'] or None
+            usuario_id = request.query_params['usuario_id']
         except:
             usuario_id = None
+
+        try:
+            especialidade = request.query_params['especialidade']
+        except:
+            especialidade = None
         
         try:
             if usuario_tipo == PACIENTE:
@@ -37,6 +52,9 @@ class UserAPI(APIView):
                 if usuario_id:
                     medicos = Medico.objects.all().get(id=usuario_id)
                     medico_response = MedicoSerializer(medicos, many = False).data
+                elif especialidade:
+                    medicos = Medico.objects.all().filter(especialidade=especialidade)
+                    medico_response = MedicoSerializer(medicos, many = True).data
                 else:
                     medicos = Medico.objects.all()
                     medico_response = MedicoSerializer(medicos, many = True).data
