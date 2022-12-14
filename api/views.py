@@ -59,7 +59,7 @@ class UserAPI(APIView):
                 else:
                     medicos = Medico.objects.all()
                     medico_response = MedicoSerializer(medicos, many = True).data
-                return Response({'usuarios':funcionario_response, 'tipo': MEDICO})
+                return Response({'usuarios':medico_response, 'tipo': MEDICO})
         except Exception as e:
             return Response("Erro ao obter usuário, verifique se o tipo e o id do usuário estão de acordo", status=status.HTTP_400_BAD_REQUEST)
 
