@@ -86,7 +86,7 @@ class UserAPI(APIView):
             endereco.estado = request.data.get('estado')
             endereco.save()
         except Exception:
-            return Response(u'Deu ruim pra criar Endereço, passa a porra dos dados certos', status=status.HTTP_400_BAD_REQUEST)
+            return Response(u'Não foi possível criar o endereço', status=status.HTTP_400_BAD_REQUEST)
 
         if usuario_tipo == PACIENTE:
             try:
@@ -100,7 +100,7 @@ class UserAPI(APIView):
                 paciente.tipo_sanguineo = request.data.get('tipo_sanguineo')
                 paciente.save()
             except Exception as e :
-                return Response(u'Deu ruim pra criar Paciente, passa a porra dos dados certos', status=status.HTTP_400_BAD_REQUEST)
+                return Response(u'Não foi possível criar o Paciente', status=status.HTTP_400_BAD_REQUEST)
             return Response('OK')
 
         elif usuario_tipo == FUNCIONARIO:
@@ -115,7 +115,7 @@ class UserAPI(APIView):
                 funcionario.data_contrato = date
                 funcionario.save()
             except Exception as e :
-                return Response(u'Deu ruim pra criar Funcionario, passa a porra dos dados certos', status=status.HTTP_400_BAD_REQUEST)
+                return Response(u'Não foi possível criar o Funcionário', status=status.HTTP_400_BAD_REQUEST)
             return Response('OK')
         else:
             try:
@@ -131,7 +131,7 @@ class UserAPI(APIView):
                 medico.crm = request.data.get('crm')
                 medico.save()
             except Exception as e :
-                return Response(u'Deu ruim pra criar Medico, passa a porra dos dados certos')
+                return Response(u'Não foi possível criar o Médico')
             return Response('OK')
 
 class EnderecoAPI(APIView):
@@ -178,10 +178,10 @@ class LoginAPI(APIView):
 class AgendaAPI(APIView):
     def post(self,request):
         data = request.data.get('data') or None
-        paciente_id = request.data.get('paciente_id') or None
+        paciente_email = request.data.get('paciente_email') or None
         medico_id = request.data.get('medico_id') or None
 
-        if not data or not paciente_id or not medico_id:
+        if not data or not paciente_email or not medico_id:
             return Response('Faltam dados na requisição', status=status.HTTP_400_BAD_REQUEST)
         
        
@@ -193,8 +193,9 @@ class AgendaAPI(APIView):
             return Response('Medico não existe', status=status.HTTP_404_NOT_FOUND)
 
         try:
-            agendamento.paciente = Paciente.objects.all().get(id=paciente_id)
-        except Paciente.DoesNotExist:
+            usuario = Usuario.objects.all().get(email=paciente_email).id
+            agendamento.paciente = Paciente.objects.all().get(id=usuario)
+        except :
             return Response('Paciente não existe', status=status.HTTP_404_NOT_FOUND)
 
         agendamento.save()
